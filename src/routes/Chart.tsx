@@ -2,25 +2,15 @@ import { useQuery } from "react-query";
 import { fetchCoinHistory } from "../api";
 import ApexChart from "react-apexcharts";
 
-interface IHistoricalData {
-	time_open: number;
-	time_close: number;
-	open: string;
-	high: string;
-	low: string;
-	close: string;
-	volume: string;
-	market_cap: number;
-}
 interface ChartProps {
 	coinId: string;
 }
 
 function Chart({ coinId }: ChartProps) {
-	const { isLoading, data } = useQuery<IHistoricalData[]>(
+	const { isLoading, data } = useQuery<Array<number[]>>(
 		["CoinHistory", coinId],
-		() => fetchCoinHistory(coinId),
-		{ refetchInterval: 10000 }
+		() => fetchCoinHistory(coinId)
+		//{ refetchInterval: 10000 }
 	);
 	return (
 		<div>
@@ -32,25 +22,26 @@ function Chart({ coinId }: ChartProps) {
 					series={[
 						{
 							name: "Price",
-							data: data
-								?.slice(7, 21)
-								.map((price) => parseFloat(price.close)) as number[],
+							data: data?.map((ohlc) => ohlc[1]) as number[],
 						},
 					]}
 					options={{
 						xaxis: {
-							categories: data?.slice(7, 21).map((price) => {
-								const time = new Date(price.time_close * 1000);
-								return time.toISOString();
+							categories: data?.map((ohlc) => {
+								const date = new Date(ohlc[0]);
+								return date.toLocaleDateString();
 							}),
 							axisBorder: { show: true },
 							axisTicks: { show: true },
 							labels: { show: true },
 							type: "datetime",
 						},
+						yaxis: {
+							labels: { formatter: (value) => `$ ${value.toFixed(3)}` },
+						},
 						theme: { mode: "dark" },
 						chart: { height: 500, width: 500, toolbar: { show: false } },
-						stroke: { curve: "smooth", width: 4 },
+						stroke: { curve: "smooth", width: 3 },
 						fill: {
 							type: "gradient",
 							gradient: {
@@ -61,7 +52,7 @@ function Chart({ coinId }: ChartProps) {
 						colors: ["#0fbcf9"],
 						tooltip: {
 							y: {
-								formatter: (value) => `$${value.toFixed(2)}`,
+								formatter: (value) => `$ ${value.toFixed(3)}`,
 							},
 						},
 					}}

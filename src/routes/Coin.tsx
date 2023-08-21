@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { styled } from "styled-components";
-import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { fetchCoinInfo } from "../api";
 import Chart from "./Chart";
 import Price from "./Price";
 
@@ -68,7 +68,7 @@ const Tabs = styled.div`
 	gap: 10px;
 `;
 
-const Tab = styled.span<{ isActive: boolean }>`
+const Tab = styled.span<{ isactive: boolean }>`
 	text-align: center;
 	text-transform: uppercase;
 	font-size: 12px;
@@ -77,7 +77,7 @@ const Tab = styled.span<{ isActive: boolean }>`
 	padding: 7px 0px;
 	border-radius: 10px;
 	color: ${(props) =>
-		props.isActive ? props.theme.accentColor : props.theme.textColor};
+		props.isactive ? props.theme.accentColor : props.theme.textColor};
 	a {
 		display: block;
 	}
@@ -95,22 +95,16 @@ interface IInfoData {
 	id: string;
 	name: string;
 	symbol: string;
-	rank: number;
-	is_new: boolean;
-	is_active: boolean;
-	type: string;
-	logo: string;
-	description: string;
-	message: string;
-	open_source: boolean;
-	started_at: string;
-	development_status: string;
-	hardware_wallet: boolean;
-	proof_type: string;
-	org_structure: string;
-	hash_algorithm: string;
-	first_data_at: string;
-	last_data_at: string;
+	coingecko_rank: number;
+	description: { en: string };
+	market_data: {
+		current_price: {
+			usd: number;
+		};
+		max_supply: number;
+		total_supply: number;
+		circulating_supply: number;
+	};
 }
 
 interface ITickersData {
@@ -154,17 +148,23 @@ function Coin() {
 	const chartMatch = useRouteMatch("/:coinId/chart");
 	const { isLoading: infoLoading, data: infoData } = useQuery<IInfoData>(
 		["info", coinId],
-		() => fetchCoinInfo(coinId)
+		() => fetchCoinInfo(coinId),
+		{
+			retry: false,
+		}
 	);
-	const { isLoading: tickersLoading, data: tickersData } =
-		useQuery<ITickersData>(
-			["tickers", coinId],
-			() => fetchCoinTickers(coinId),
-			{
-				refetchInterval: 5000,
-			}
-		);
-	const loading = infoLoading || tickersLoading;
+	// const { isLoading: tickersLoading, data: tickersData } =
+	// 	useQuery<ITickersData>(
+	// 		["tickers", coinId],
+	// 		() => fetchCoinTickers(coinId),
+	// 		{
+	// 			retry: false,
+	// 		}
+	// 		// {
+	// 		// 	refetchInterval: 5000,
+	// 		// }
+	// 	);
+	const loading = infoLoading;
 	return (
 		<Container>
 			<Helmet>
@@ -184,7 +184,7 @@ function Coin() {
 					<Overview>
 						<OverviewItem>
 							<span>Rank :</span>
-							<span>{infoData?.rank}</span>
+							<span>{infoData?.coingecko_rank}</span>
 						</OverviewItem>
 						<OverviewItem>
 							<span>Symbol :</span>
@@ -192,32 +192,36 @@ function Coin() {
 						</OverviewItem>
 						<OverviewItem>
 							<span>Price :</span>
-							<span>{tickersData?.quotes.USD.price.toFixed(3)}</span>
+							<span>{infoData?.market_data.current_price.usd.toFixed(3)}</span>
 						</OverviewItem>
 					</Overview>
-					<Description>{infoData?.description}</Description>
+					<Description>{infoData?.description.en}</Description>
 					<Overview>
 						<OverviewItem>
 							<span>Total Supply :</span>
-							<span>{tickersData?.total_supply}</span>
+							<span>{infoData?.market_data.total_supply.toFixed(3)}</span>
+						</OverviewItem>
+						<OverviewItem>
+							<span>Circulating Supply :</span>
+							<span>{infoData?.market_data.circulating_supply.toFixed(3)}</span>
 						</OverviewItem>
 						<OverviewItem>
 							<span>Max Supply :</span>
-							<span>{tickersData?.max_supply}</span>
+							<span>{infoData?.market_data.max_supply}</span>
 						</OverviewItem>
 					</Overview>
 
 					<Tabs>
-						<Tab isActive={chartMatch !== null}>
+						<Tab isactive={chartMatch !== null}>
 							<Link to={`/${coinId}/chart`}>Chart</Link>
 						</Tab>
-						<Tab isActive={priceMatch !== null}>
+						<Tab isactive={priceMatch !== null}>
 							<Link to={`/${coinId}/price`}>Price</Link>
 						</Tab>
 					</Tabs>
 					<Switch>
 						<Route path={"/:coinId/price"}>
-							<Price />
+							<Price coinId={coinId} />
 						</Route>
 						<Route path={"/:coinId/chart"}>
 							<Chart coinId={coinId} />

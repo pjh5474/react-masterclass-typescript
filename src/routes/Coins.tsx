@@ -11,8 +11,9 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-	height: 10vh;
+	height: 15vh;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 `;
@@ -53,6 +54,11 @@ const Title = styled.h1`
 	color: ${(props) => props.theme.accentColor};
 `;
 
+const Subtitle = styled.h3`
+	font-size: 18px;
+	color: ${(props) => props.theme.textColor};
+`;
+
 const Loader = styled.span`
 	text-align: center;
 	display: block;
@@ -65,7 +71,10 @@ const Img = styled.img`
 `;
 
 function Coins() {
-	const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
+	const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins, {
+		retry: false,
+	});
+	console.log(data);
 	return (
 		<Container>
 			<Helmet>
@@ -73,6 +82,7 @@ function Coins() {
 			</Helmet>
 			<Header>
 				<Title>Coins</Title>
+				<Subtitle> Data provided by CoinGecko </Subtitle>
 			</Header>
 			{isLoading ? (
 				<Loader>Loading...</Loader>
