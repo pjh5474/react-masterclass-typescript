@@ -93,8 +93,8 @@ function Coin() {
 	const [loading, setLoading] = useState<boolean>(true);
 	const { coinId } = useParams<RouteParams>();
 	const { state } = useLocation<RouteState>();
-	const [info, setInfo] = useState<InfoData>({});
-	const [priceInfo, setPriceInfo] = useState({});
+	const [info, setInfo] = useState<InfoData>();
+	const [priceInfo, setPriceInfo] = useState<PriceData>();
 	useEffect(() => {
 		(async () => {
 			const infoData = await (
@@ -105,10 +105,9 @@ function Coin() {
 			).json();
 			setInfo(infoData);
 			setPriceInfo(priceData);
-			console.log(infoData);
-			console.log(priceData);
+			setLoading(false);
 		})();
-	}, []);
+	}, [coinId]);
 	return (
 		<Container>
 			<Header>
