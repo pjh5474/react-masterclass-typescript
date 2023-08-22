@@ -11,7 +11,6 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-	height: 15vh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -57,6 +56,7 @@ const Title = styled.h1`
 const Subtitle = styled.h3`
 	font-size: 18px;
 	color: ${(props) => props.theme.textColor};
+	margin-bottom: 10px;
 `;
 
 const Loader = styled.span`
@@ -74,7 +74,6 @@ function Coins() {
 	const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins, {
 		retry: false,
 	});
-	console.log(data);
 	return (
 		<Container>
 			<Helmet>
